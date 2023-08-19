@@ -1,0 +1,257 @@
+DECLARE
+
+                        l_body_html   CLOB;
+
+                        v_name        NVARCHAR2 (50);
+
+                        v_code        NVARCHAR2 (50);
+
+                        v_email       NVARCHAR2 (50);
+
+                        l_checkout_date   TIMESTAMP;
+
+                        l_time_window     INTERVAL DAY(2) TO SECOND(0); -- Adjusted precision to DAY(2)
+
+                        l_public_page_url VARCHAR2(200); -- Replace this with the URL of your public page
+
+BEGIN
+
+                        l_checkout_date := TO_TIMESTAMP(:P35_DATE_BOOK_END, 'YYYY-MM-DD"T"HH24:MI');
+
+                        l_time_window := NUMTODSINTERVAL(1, 'DAY'); -- Set the time window to 1 day
+
+                        l_public_page_url := 'https://gcce7a8d6176cb4-aims.adb.ap-singapore-1.oraclecloudapps.com/ords/r/aims/aims/write-reviews?p11_esta_id_fk=' || :P35_ESTA_ID_FK_FORM || '&p11_estab_name_fk=' || REPLACE(:P35_ESTA_NAME_FK_FORM,' ', '%20');
+
+                        v_email := :P35_EMAIL_FORM;
+
+                        l_body_html :=
+
+'<!DOCTYPE html>
+
+<html lang="en-US">
+
+ 
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>You can now write a review for '|| :P35_ESTA_NAME_FK_FORM ||'</title>
+
+  <style>
+
+    body {
+
+      margin: 0;
+
+      padding: 0;
+
+      font-family: Arial, sans-serif;
+
+      background-color: #f2f2f2;
+
+    }
+
+ 
+
+    .container {
+
+      max-width: 600px;
+
+      margin: 0 auto;
+
+      background-color: #f3f3f3;
+
+      border-radius: 5px;
+
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+
+    }
+
+ 
+
+    .header {
+
+      background-color: #244283;
+
+      color: #fff;
+
+      padding: 20px;
+
+      border-top-left-radius: 5px;
+
+      border-top-right-radius: 5px;
+
+      position: relative;
+
+    }
+
+ 
+
+    h2 {
+
+      margin: 0;
+
+      padding: 0;
+
+      font-size: 24px;
+
+    }
+
+ 
+
+    .content {
+
+      padding: 30px;
+      background-color: #f5f5f5;
+
+    }
+
+ 
+
+    p {
+
+      margin: 0;
+
+      padding-bottom: 20px;
+
+      line-height: 1.5;
+
+      font-weight: 600;
+
+    }
+
+
+    .footer {
+      background-color: #244283;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+
+
+    .footer p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+ 
+
+    .button-style {
+
+      display: inline-block;
+
+      padding: 10px 20px;
+
+      background-color: #244283;
+
+      color: #fff;
+
+      text-decoration: none;
+
+      border-radius: 4px;
+
+      font-weight: bold;
+
+      transition: background-color 0.3s;
+
+      border: none;
+
+      cursor: pointer;
+
+    }
+
+ 
+
+    .button-style:hover {
+
+      background-color: #1d356d;
+
+    }
+
+ 
+
+    @media only screen and (max-width: 480px) {
+
+      .button-style {
+
+        padding: 8px 16px;
+
+        font-size: 14px;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+ 
+
+<body>
+
+  <div class="container">
+
+    <div class="background-abstract"></div>
+
+    <div class="header">
+
+      <h2>Write a Review</h2>
+
+      <span class="header-logo"></span>
+
+    </div>
+
+    <div class="content">
+
+      <p>Dear '|| :P35_BOOKED_NAME ||', your check-out time is approaching. Please click the button and post a Review.<br>Thank You!.</p>
+
+      <p><a href="'||l_public_page_url||'" class="button"><button class="button-style">Review Button</button></a></p>
+
+    </div>
+    <div class="footer">
+  		<p>&copy; 2023 MindConcept Solutions. All rights reserved.</p>
+	</div>
+
+  </div>
+
+</body>
+
+ 
+
+</html>
+
+';     
+
+            IF l_checkout_date <= CURRENT_TIMESTAMP + l_time_window THEN
+            -- IF l_checkout_date <= CURRENT_TIMESTAMP THEN
+--  IF l_checkout_date <= CURRENT_TIMESTAMP THEN
+            apex_mail.send (
+
+                             :P35_EMAIL_FORM,
+
+                             'admin@mindconceptsolutions.com',
+
+                              l_body_html,
+
+                              l_body_html,
+
+                              'Arrival Information Management System (AIMS) Review Email'
+                            );     
+                            apex_mail.push_queue();     
+              END IF;
+
+                    -- EXCEPTION
+
+                    --     WHEN OTHERS
+
+                    --     THEN
+
+                    --         NULL;
+
+                    END;
