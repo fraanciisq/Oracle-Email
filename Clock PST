@@ -1,0 +1,18 @@
+<div style="font-size: 16px; display: flex; align-items: center; justify-content: flex-end; margin-left: 5px; padding-right: 35px;">
+  <img src="#APP_FILES#philippines-flag-png-xl.png" alt="Philippine Flag" style="width: 16px; height: 16px; margin-right: 5px;">
+  <span style="font-size: 16px; color: black; font-weight: bold; margin-right: 5px;">Philippine Standard Time :</span>
+  <span id="dateTime" style="font-size: 16px; color: black;"></span>
+</div>
+
+
+<script>
+function updateDateTime() {
+  var now = new Date();
+  var options = { timeZone: 'Asia/Manila', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' };
+  var dateTime = now.toLocaleString('en-US', options);
+  document.getElementById("dateTime").textContent = dateTime;
+}
+
+// Update the date and time every second
+setInterval(updateDateTime, 1000);
+</script>
