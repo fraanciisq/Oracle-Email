@@ -1,0 +1,47 @@
+DECLARE
+    l_body_html CLOB;
+    v_name NVARCHAR2(50);
+    v_code NVARCHAR2(50);
+    v_email NVARCHAR2(50);
+    l_checkout_date TIMESTAMP;
+    l_public_page_url VARCHAR2(200);
+
+    l_comparison_timestamp TIMESTAMP;
+    l_manila_time TIMESTAMP;
+BEGIN
+    l_checkout_date := TO_TIMESTAMP(:P35_DATE_BOOK_END, 'DD-MON-YY HH.MI.SS.FF9 AM');
+    l_comparison_timestamp := l_checkout_date - INTERVAL '1' HOUR; -- Calculate one hour before checkout date
+
+    -- Get the current time in Manila time zone
+    SELECT TRUNC(SYSTIMESTAMP AT TIME ZONE 'Asia/Manila') + INTERVAL '17' HOUR INTO l_manila_time FROM DUAL;
+
+    -- Check the condition and send email if true
+    IF l_comparison_timestamp <= l_manila_time THEN
+        l_public_page_url := 'https://gcce7a8d6176cb4-aims.adb.ap-singapore-1.oraclecloudapps.com/ords/r/aims/aims/write-reviews?p11_esta_id_fk=' || :P35_ESTA_ID_FK_FORM || '&p11_estab_name_fk=' || REPLACE(:P35_ESTA_NAME_FK_FORM,' ', '%20');
+        v_email := :P35_EMAIL_FORM;
+
+        l_body_html :=
+            '<!DOCTYPE html>
+            ... (rest of your HTML code) ...';
+
+        -- Send the email
+        BEGIN
+            apex_mail.send (
+                p_to => v_email,
+                p_from => 'admin@mindconceptsolutions.com',
+                p_body => l_body_html,
+                p_body_html => l_body_html,
+                p_subj => 'Arrival Information Management System (AIMS) Review Email'
+            );
+            apex_mail.push_queue();
+            DBMS_OUTPUT.PUT_LINE('Email sent successfully.');
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+                -- Handle the exception as needed
+        END;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Condition not met. Email not sent.');
+    END IF;
+END;
+/
