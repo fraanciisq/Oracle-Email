@@ -1,0 +1,18 @@
+DECLARE
+   l_check_out_date TIMESTAMP;
+--    l_review_link VARCHAR2(4000);
+   l_manila_time TIMESTAMP;
+
+BEGIN
+   l_check_out_date := TO_TIMESTAMP(:P35_DATE_BOOK_END, 'YYYY-MM-DD"T"HH24:MI');
+   l_manila_time := TO_TIMESTAMP(CAST(SYSTIMESTAMP AT TIME ZONE 'Asia/Manila' AS TIMESTAMP));
+
+   IF TO_TIMESTAMP(:P35_DATE_BOOK_END, 'YYYY-MM-DD"T"HH24:MI')  >= TO_TIMESTAMP(CAST(SYSTIMESTAMP AT TIME ZONE 'Asia/Manila' AS TIMESTAMP))  THEN 
+      apex_mail.send(p_from => 'admin@mindconceptsolutions.com',
+                     p_to => 'johnfrancis.tamondong@ust-legazpi.edu.ph',
+                     p_subj => 'Email from Autonomous Database OCI',
+                     p_body => 'This is a test email from Autonomous');
+                     
+      apex_mail.push_queue();
+   END IF;
+END;   
